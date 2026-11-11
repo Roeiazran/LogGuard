@@ -27,4 +27,4 @@ Build instructions will be added with milestone M0 (CMake + presets).
 
 ## License
 
-TBD
+MIT
