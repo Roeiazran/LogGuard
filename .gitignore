@@ -1,0 +1,57 @@
+# ---------------------------------------------------------------
+# Private / local-only material (never published)
+# ---------------------------------------------------------------
+/LogGuard_Complete_Architecture.md
+/private/
+
+# ---------------------------------------------------------------
+# Build output (CMake is always run out-of-source)
+# ---------------------------------------------------------------
+/build/
+/out/
+cmake-build-*/
+CMakeUserPresets.json
+/compile_commands.json
+.cache/
+
+# ---------------------------------------------------------------
+# Data, models and run results (large / regenerable)
+# Only documentation and small committed fixtures are tracked.
+# ---------------------------------------------------------------
+/data/*
+!/data/README.md
+!/data/fixtures/
+/models/*
+!/models/README.md
+/results/
+
+# ---------------------------------------------------------------
+# Python (offline ML)
+# ---------------------------------------------------------------
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+
+# ---------------------------------------------------------------
+# Firmware (extension phase, ESP-IDF)
+# ---------------------------------------------------------------
+/firmware/**/build/
+/firmware/**/sdkconfig
+/firmware/**/sdkconfig.old
+/firmware/**/managed_components/
+
+# ---------------------------------------------------------------
+# Web (optional phase)
+# ---------------------------------------------------------------
+node_modules/
+/web/dist/
+
+# ---------------------------------------------------------------
+# Editors / OS
+# ---------------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+.DS_Store
