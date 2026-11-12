@@ -4,8 +4,8 @@
 |---|---|
 | **Document status** | Living document — updated with every architectural change |
 | **Version** | 1.0 |
-| **Last updated** | 2026-11-11 |
-| **Product status** | M0 (Foundation) — in progress |
+| **Last updated** | 2026-11-12 |
+| **Product status** | M0 (Foundation) — complete · M1 next |
 | **Decision log** | [`docs/adr/`](adr/README.md) |
 
 ---
@@ -455,9 +455,9 @@ Precedence: **CLI flag > config file > built-in default.**
 | C++ standard | C++20 |
 | CMake | ≥ 3.25 (presets) |
 | Generator | Ninja |
-| Compilers | gcc ≥ 12, clang ≥ 16, Apple clang (dev) |
+| Compilers | gcc ≥ 12, clang ≥ 16, Apple clang (dev). CI-verified: GCC 14, Clang 18, Apple clang |
 | Python | 3.12 (offline ML only) |
-| Formatting / lint | clang-format, clang-tidy (configs at repo root) |
+| Formatting / lint | clang-format, clang-tidy 23.x (configs at repo root; versions pinned in CI) |
 
 Exact versions are pinned in CI and recorded in `docs/getting-started.md`.
 
@@ -465,11 +465,11 @@ Exact versions are pinned in CI and recorded in `docs/getting-started.md`.
 
 | Library | Purpose | Linked by | Acquisition |
 |---|---|---|---|
-| GoogleTest | Unit / integration tests | tests only | CMake `FetchContent`, pinned tag |
-| nlohmann/json | Config, reports, manifests | `logguard_io`, `apps` | `FetchContent`, pinned tag |
-| CLI11 | Command-line parsing | `apps` only | `FetchContent`, pinned tag |
-| spdlog | Diagnostics logging | `apps` (+ io) | `FetchContent`, pinned tag |
-| Google Benchmark | Micro-benchmarks | `benchmarks/` only | `FetchContent`, pinned tag (M5) |
+| GoogleTest | Unit / integration tests | tests only | `FetchContent`, release archive + SHA-256 (v1.18.0) |
+| nlohmann/json | Config, reports, manifests | `logguard_io`, `apps` | `FetchContent`, release archive + SHA-256 (M1) |
+| CLI11 | Command-line parsing | `apps` only | `FetchContent`, release archive + SHA-256 (M1) |
+| spdlog | Diagnostics logging | `apps` (+ io) | `FetchContent`, release archive + SHA-256 (M1) |
+| Google Benchmark | Micro-benchmarks | `benchmarks/` only | `FetchContent`, release archive + SHA-256 (M5) |
 | ONNX Runtime | Model inference | `logguard_onnx` only | Prebuilt release, checksum-verified (M4) |
 
 Rationale: [ADR-0005](adr/ADR-0005-build-system-and-dependencies.md).
@@ -478,18 +478,32 @@ Rationale: [ADR-0005](adr/ADR-0005-build-system-and-dependencies.md).
 
 | Option | Default | Effect |
 |---|---|---|
-| `LOGGUARD_BUILD_TESTS` | `ON` | Build the test suite |
-| `LOGGUARD_WITH_ONNX` | `OFF` | Build `logguard_onnx` (requires ONNX Runtime) |
-| `LOGGUARD_BUILD_BENCHMARKS` | `OFF` | Build benchmarks |
-| `LOGGUARD_WARNINGS_AS_ERRORS` | `OFF` locally, `ON` in CI | `-Werror` |
+| `LOGGUARD_BUILD_TESTS` | `ON` when LogGuard is the top-level project | Build the test suite |
+| `LOGGUARD_WARNINGS_AS_ERRORS` | `OFF` (`ON` in CI and the `lint` preset) | Treat compiler (and clang-tidy) warnings as errors |
+| `LOGGUARD_SANITIZERS` | empty | Subset of `address;undefined;thread`. `address` + `thread` is rejected. |
+| `LOGGUARD_ENABLE_CLANG_TIDY` | `OFF` | Run clang-tidy while compiling LogGuard targets |
+| `LOGGUARD_WITH_ONNX` | `OFF` | Build `logguard_onnx` (requires ONNX Runtime) — M4 |
+| `LOGGUARD_BUILD_BENCHMARKS` | `OFF` | Build benchmarks — M5 |
 
-Presets: `debug`, `release`, `asan` (Address + UB sanitizers), `tsan` (ThreadSanitizer).
+All tooling is applied per target through `logguard_configure_target(<target>)` (warnings, sanitizers, clang-tidy) — never through global compiler flags.
+
+| Preset | Purpose |
+|---|---|
+| `debug` | Daily development (`-O0 -g`) |
+| `release` | Optimized build |
+| `asan` | Debug + AddressSanitizer + UndefinedBehaviorSanitizer |
+| `tsan` | Debug + ThreadSanitizer |
+| `lint` | Debug + clang-tidy, warnings as errors |
 
 ```bash
+cmake --workflow --preset debug        # configure + build + test in one command
+# or step by step:
 cmake --preset debug
 cmake --build --preset debug
 ctest --preset debug
 ```
+
+See [`getting-started.md`](getting-started.md) for prerequisites and troubleshooting.
 
 ### 16.4 Coding standards
 
@@ -504,8 +518,8 @@ ctest --preset debug
 
 | Trigger | Gate |
 |---|---|
-| Every PR | Build (gcc + clang, Linux), unit + integration tests, clang-format check, clang-tidy |
-| Merge to `main` | + ASan/UBSan, TSan (from M5), golden-vector / model-contract tests |
+| Every PR and push to `main` | clang-format check · build + tests with warnings as errors (Linux GCC 14, Linux Clang 18, macOS Apple clang) · ASan/UBSan and TSan test runs · clang-tidy build |
+| Added in later milestones | golden-vector / model-contract tests (M2/M4), concurrency stress tests (M5) |
 | Release tag | + Release build, checksums, published benchmark + evaluation report |
 
 ### 16.6 Definition of Done (per change)
