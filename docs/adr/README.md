@@ -26,7 +26,7 @@ Write an ADR when a decision:
 | [0002](ADR-0002-domain-separation.md) | BGL logs and Edge telemetry are separate domains | Accepted | M0 |
 | [0003](ADR-0003-cli-first.md) | CLI-first delivery before any HTTP server or UI | Accepted | M0 |
 | [0004](ADR-0004-core-first-hardware-extension.md) | Core first; embedded hardware is an extension | Accepted | M0 |
-| [0005](ADR-0005-build-system-and-dependencies.md) | CMake presets + pinned FetchContent dependencies | Proposed | M0 |
+| [0005](ADR-0005-build-system-and-dependencies.md) | CMake presets + pinned FetchContent dependencies | Accepted | M0 |
 | 0006 | Label isolation at the parser boundary | Planned | M1 |
 | 0007 | Error-handling strategy (result types vs. exceptions) | Planned | M1 |
 | 0008 | Template extraction method and vocabulary fitting | Planned | M2 |
