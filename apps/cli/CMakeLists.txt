@@ -8,3 +8,4 @@ target_link_libraries(logguard
 )
 
 logguard_set_warnings(logguard)
+logguard_enable_sanitizers(logguard)
