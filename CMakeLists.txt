@@ -12,5 +12,14 @@ endif()
 
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+option(LOGGUARD_BUILD_TESTS "Build the LogGuard test suite" ${PROJECT_IS_TOP_LEVEL})
+
+include(cmake/Dependencies.cmake)
+
 add_subdirectory(src)
 add_subdirectory(apps/cli)
+
+if(LOGGUARD_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
