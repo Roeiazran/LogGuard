@@ -14,6 +14,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(LOGGUARD_BUILD_TESTS "Build the LogGuard test suite" ${PROJECT_IS_TOP_LEVEL})
 
+include(cmake/CompilerWarnings.cmake)
 include(cmake/Dependencies.cmake)
 
 add_subdirectory(src)

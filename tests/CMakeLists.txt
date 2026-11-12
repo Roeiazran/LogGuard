@@ -13,5 +13,7 @@ target_compile_definitions(logguard_tests
         LOGGUARD_EXPECTED_VERSION="${PROJECT_VERSION}"
 )
 
+logguard_set_warnings(logguard_tests)
+
 include(GoogleTest)
 gtest_discover_tests(logguard_tests)
