@@ -9,8 +9,7 @@ target_include_directories(logguard_core
 )
 
 target_compile_features(logguard_core PUBLIC cxx_std_20)
-logguard_set_warnings(logguard_core)
-logguard_enable_sanitizers(logguard_core)
+logguard_configure_target(logguard_core)
 
 # Single source of truth for the version: project(VERSION ...) in the root CMakeLists.txt
 target_compile_definitions(logguard_core

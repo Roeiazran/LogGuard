@@ -50,6 +50,16 @@
       "cacheVariables": {
         "LOGGUARD_SANITIZERS": "thread"
       }
+    },
+    {
+      "name": "lint",
+      "displayName": "Lint (clang-tidy)",
+      "description": "Debug build that runs clang-tidy on every LogGuard source; warnings are errors.",
+      "inherits": "debug",
+      "cacheVariables": {
+        "LOGGUARD_ENABLE_CLANG_TIDY": "ON",
+        "LOGGUARD_WARNINGS_AS_ERRORS": "ON"
+      }
     }
   ],
   "buildPresets": [
@@ -68,6 +78,10 @@
     {
       "name": "tsan",
       "configurePreset": "tsan"
+    },
+    {
+      "name": "lint",
+      "configurePreset": "lint"
     }
   ],
   "testPresets": [

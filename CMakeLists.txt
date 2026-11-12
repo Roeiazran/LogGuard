@@ -16,7 +16,15 @@ option(LOGGUARD_BUILD_TESTS "Build the LogGuard test suite" ${PROJECT_IS_TOP_LEV
 
 include(cmake/CompilerWarnings.cmake)
 include(cmake/Sanitizers.cmake)
+include(cmake/ClangTidy.cmake)
 include(cmake/Dependencies.cmake)
+
+# Apply LogGuard's standard tooling to one of our own targets.
+function(logguard_configure_target target)
+    logguard_set_warnings(${target})
+    logguard_enable_sanitizers(${target})
+    logguard_enable_clang_tidy(${target})
+endfunction()
 
 add_subdirectory(src)
 add_subdirectory(apps/cli)

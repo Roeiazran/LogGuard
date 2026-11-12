@@ -7,5 +7,4 @@ target_link_libraries(logguard
         logguard::core
 )
 
-logguard_set_warnings(logguard)
-logguard_enable_sanitizers(logguard)
+logguard_configure_target(logguard)

@@ -2,6 +2,8 @@
 
 namespace logguard {
 
-std::string_view Version() noexcept { return LOGGUARD_VERSION; }
+std::string_view Version() noexcept {
+    return LOGGUARD_VERSION;
+}
 
 }  // namespace logguard
