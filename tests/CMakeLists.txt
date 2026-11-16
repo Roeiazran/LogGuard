@@ -1,5 +1,7 @@
 add_executable(logguard_tests
     unit/core/VersionTest.cpp
+    unit/core/ResultTest.cpp
+    unit/core/Utf8Test.cpp
 )
 
 target_link_libraries(logguard_tests
