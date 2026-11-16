@@ -5,12 +5,14 @@ add_executable(logguard_tests
     unit/bgl/BglTimestampTest.cpp
     unit/bgl/BglParserTest.cpp
     unit/bgl/LabeledBglParserTest.cpp
+    unit/io/LineReaderTest.cpp
 )
 
 target_link_libraries(logguard_tests
     PRIVATE
-        # logguard::core comes in automatically: bgl links it PUBLIC.
+        # logguard::core comes in automatically: bgl and io link it PUBLIC.
         logguard::bgl
+        logguard::io
         GTest::gtest_main
 )
 
