@@ -1,0 +1,6 @@
+# Tests use the root profile, with one exception.
+InheritParentConfig: true
+
+# clang-tidy does not know that GoogleTest's ASSERT_TRUE(opt) stops the test,
+# so every *opt after it would be reported as unchecked.
+Checks: -bugprone-unchecked-optional-access

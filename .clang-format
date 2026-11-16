@@ -12,8 +12,8 @@ AllowShortIfStatementsOnASingleLine: Never
 AllowShortLoopsOnASingleLine: false
 IncludeBlocks: Regroup
 IncludeCategories:
-  # 1. Project headers
-  - Regex: '^"logguard/'
+  # 1. Project headers (anything in quotes)
+  - Regex: '^"'
     Priority: 1
   # 2. Third-party headers
   - Regex: '^<(gtest|gmock|nlohmann|CLI|spdlog|benchmark|onnxruntime)'
