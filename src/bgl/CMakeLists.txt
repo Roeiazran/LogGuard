@@ -2,6 +2,7 @@ add_library(logguard_bgl
     ParseError.cpp
     BglTimestamp.cpp
     BglParser.cpp
+    InspectStats.cpp
 )
 add_library(logguard::bgl ALIAS logguard_bgl)
 

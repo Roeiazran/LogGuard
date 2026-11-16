@@ -5,6 +5,7 @@ add_executable(logguard_tests
     unit/bgl/BglTimestampTest.cpp
     unit/bgl/BglParserTest.cpp
     unit/bgl/LabeledBglParserTest.cpp
+    unit/bgl/InspectStatsTest.cpp
     unit/io/LineReaderTest.cpp
 )
 
