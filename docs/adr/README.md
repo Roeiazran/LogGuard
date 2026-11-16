@@ -27,8 +27,8 @@ Write an ADR when a decision:
 | [0003](ADR-0003-cli-first.md) | CLI-first delivery before any HTTP server or UI | Accepted | M0 |
 | [0004](ADR-0004-core-first-hardware-extension.md) | Core first; embedded hardware is an extension | Accepted | M0 |
 | [0005](ADR-0005-build-system-and-dependencies.md) | CMake presets + pinned FetchContent dependencies | Accepted | M0 |
-| 0006 | Label isolation at the parser boundary | Planned | M1 |
-| 0007 | Error-handling strategy (result types vs. exceptions) | Planned | M1 |
+| [0006](ADR-0006-label-isolation.md) | Label isolation at the parser boundary | Accepted | M1 |
+| [0007](ADR-0007-error-handling.md) | Expected failures are values (`Result<T, E>`), exceptions are for the rest | Accepted | M1 |
 | 0008 | Template extraction method and vocabulary fitting | Planned | M2 |
 | 0009 | Feature schema versioning and golden vectors | Planned | M2 |
 | 0010 | Chronological split and window labeling rule | Planned | M3 |

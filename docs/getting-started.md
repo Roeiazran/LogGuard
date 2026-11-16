@@ -25,10 +25,11 @@ Do not put Homebrew's `clang++` first when building; the presets use the system 
 git clone https://github.com/Roeiazran/LogGuard.git
 cd LogGuard
 cmake --workflow --preset debug     # configure + build + test
-./build/debug/apps/cli/logguard     # prints: logguard 0.1.0
+./build/debug/apps/cli/logguard --version
+./build/debug/apps/cli/logguard inspect --input data/fixtures/bgl-small.log --format bgl
 ```
 
-The first configure downloads GoogleTest (network required). Build output goes to `build/<preset>/`, which is safe to delete at any time.
+The first configure downloads GoogleTest, CLI11 and nlohmann/json (network required). Build output goes to `build/<preset>/`, which is safe to delete at any time.
 
 Step by step (useful while developing):
 
@@ -65,9 +66,10 @@ CI runs the same checks (see [architecture §16.5](architecture.md#165-ci-qualit
 
 ```text
 apps/cli/        logguard executable
-include/logguard public headers, one folder per library
-src/             library implementations (mirrors include/)
-tests/           GoogleTest suites (mirrors src/)
+include/logguard public headers, one folder per library (core, bgl, io)
+src/             library implementations, one CMakeLists.txt per library
+tests/           unit/ (GoogleTest, mirrors src/) and integration/ (runs the CLI)
+data/fixtures/   small synthetic logs used by tests and CI
 cmake/           build helpers: warnings, sanitizers, clang-tidy, dependencies
 scripts/         developer scripts (format.sh)
 docs/            architecture, ADRs, guides
@@ -82,3 +84,4 @@ docs/            architecture, ADRs, guides
 | clang-tidy: `'string_view' file not found` (macOS) | Configure through the `lint` preset or `LOGGUARD_ENABLE_CLANG_TIDY=ON`; CMake passes the macOS SDK path automatically. |
 | TSan: `unexpected memory mapping` (Linux) | Newer kernels use more address randomization than TSan supports: `sudo sysctl vm.mmap_rnd_bits=28`. |
 | `clang-format` reports differences that CI does not (or vice versa) | Use clang-format 23.x, the version pinned in CI. |
+| `cli.inspect.matches_expected_output` fails after an intended output change | Inspect `build/<preset>/tests/inspect-bgl-small.actual.json`; if correct, copy it over `tests/integration/inspect-bgl-small.expected.json`. |

@@ -1,0 +1,20 @@
+{
+  "format": "bgl",
+  "lines": {
+    "total": 19,
+    "valid": 13,
+    "invalid": 6
+  },
+  "invalid_by_reason": {
+    "empty_line": 1,
+    "too_long": 0,
+    "missing_fields": 3,
+    "bad_timestamp": 2,
+    "invalid_utf8": 0
+  },
+  "unique_sources": 9,
+  "time_range": {
+    "earliest": "2005-06-03T15:42:50.363775",
+    "latest": "2005-12-31T23:59:59.999999"
+  }
+}

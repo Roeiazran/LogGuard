@@ -8,6 +8,7 @@ Checks: >
   cppcoreguidelines-*,
   -cppcoreguidelines-avoid-magic-numbers,
   -cppcoreguidelines-pro-bounds-constant-array-index,
+  -cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,
   misc-*,
   -misc-non-private-member-variables-in-classes,
   -misc-include-cleaner,
@@ -20,6 +21,7 @@ Checks: >
 
 WarningsAsErrors: ''
 HeaderFilterRegex: '(include|src|apps)/.*'
+ExcludeHeaderFilterRegex: '.*/_deps/.*'   # never report inside downloaded dependencies
 FormatStyle: file
 
 CheckOptions:

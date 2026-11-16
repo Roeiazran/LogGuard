@@ -4,8 +4,8 @@
 |---|---|
 | **Document status** | Living document — updated with every architectural change |
 | **Version** | 1.0 |
-| **Last updated** | 2026-11-12 |
-| **Product status** | M0 (Foundation) — complete · M1 next |
+| **Last updated** | 2026-11-16 |
+| **Product status** | M1 (Parser & Inspect) — complete · M2 next |
 | **Decision log** | [`docs/adr/`](adr/README.md) |
 
 ---
@@ -96,7 +96,7 @@ flowchart LR
 
 ## 4. Architectural Principles
 
-1. **Label isolation at the parsing boundary.** Ground-truth labels are split from records the moment a line is parsed. Runtime types cannot represent a label. ([ADR-0006](adr/README.md), planned)
+1. **Label isolation at the parsing boundary.** Ground-truth labels are split from records the moment a line is parsed. Runtime types cannot represent a label. ([ADR-0006](adr/ADR-0006-label-isolation.md))
 2. **One feature implementation.** Training features and runtime features are produced by the *same* C++ extractor (via `export-features`). No re-implementation in Python.
 3. **Contracts are explicit and versioned.** Feature schemas, model manifests, and output formats carry IDs and are validated before use. Mismatch ⇒ fail closed.
 4. **Domains do not mix.** BGL and (future) Edge telemetry have separate windows, features, schemas, and models. ([ADR-0002](adr/ADR-0002-domain-separation.md))
@@ -238,23 +238,31 @@ public:
     virtual void Flush() = 0;
 };
 
-// ---- bgl --------------------------------------------------------
+}  // namespace logguard
+
+// ---- bgl (implemented in M1) -------------------------------------
+namespace logguard::bgl {
+
+using Timestamp = std::chrono::sys_time<std::chrono::microseconds>;
+
 struct BglEvent {                        // runtime type: has NO label field
-    uint64_t sequence_id{};
-    std::chrono::sys_time<std::chrono::microseconds> timestamp{};
+    Timestamp timestamp;                 // from the BGL "Time" field
     std::string source_id;               // BGL "Node"
     std::string component;
     std::string level;
     std::string message;
-    uint32_t template_id{};              // 0 = unknown
+    // M2 adds: sequence_id, template_id (0 = unknown)
 };
 
-enum class BglParseError { kEmptyLine, kTooLong, kMissingFields, kBadTimestamp, kInvalidUtf8 };
+enum class ParseError { kEmptyLine, kTooLong, kMissingFields, kBadTimestamp, kInvalidUtf8 };
 
-}  // namespace logguard
+Result<BglEvent, ParseError> ParseBglLine(std::string_view line);                // runtime
+Result<LabeledBglEvent, ParseError> ParseLabeledBglLine(std::string_view line);  // offline only
+
+}  // namespace logguard::bgl
 ```
 
-How the label is returned only to offline tools (and how parse errors are returned) is decided in ADR-0006 and ADR-0007.
+Labels reach offline tools only, through `ParseLabeledBglLine` ([ADR-0006](adr/ADR-0006-label-isolation.md)). Parse errors are returned as values with `Result<T, E>` ([ADR-0007](adr/ADR-0007-error-handling.md)).
 
 ---
 
@@ -266,7 +274,7 @@ Loghub BGL lines are space-separated with a free-text tail:
 
 ```text
 <Label> <Timestamp> <Date> <Node> <Time> <NodeRepeat> <Type> <Component> <Level> <Content...>
--  1117838570 2005.06.03 R02-M1-N0-C:J12-U11 2005-06-03-15.42.50.363779 R02-M1-N0-C:J12-U11 RAS KERNEL INFO instruction cache parity error corrected
+- 1117838570 2005.06.03 R02-M1-N0-C:J12-U11 2005-06-03-15.42.50.363779 R02-M1-N0-C:J12-U11 RAS KERNEL INFO instruction cache parity error corrected
 ```
 
 | Field | Use |
@@ -277,7 +285,7 @@ Loghub BGL lines are space-separated with a free-text tail:
 | `Node` | `source_id` for windowing. |
 | `Component`, `Level`, `Content` | Normalized into the template. |
 
-Exact validation rules (field count, timestamp formats, unusual node values) are pinned down in M1 and documented in `docs/input-formats.md`.
+Exact validation rules (field count, timestamp format, unusual node values) are documented in [`docs/input-formats.md`](input-formats.md).
 
 ### 8.2 Feature schema `bgl-feature-v1` (72 × float32)
 
@@ -373,7 +381,7 @@ M1–M4 run single-threaded. M5 introduces this model, gated by an equivalence t
 
 ## 11. Error Handling and Failure Modes
 
-**Policy:** expected, data-driven failures (bad lines, bad JSON) are **values**, counted and reported. Exceptions are reserved for environment/programmer failures (cannot open file, out of memory, broken invariant) and are caught once at the CLI boundary. The concrete result type is chosen in ADR-0007.
+**Policy:** expected, data-driven failures (bad lines, bad JSON) are **values**, counted and reported. Exceptions are reserved for environment/programmer failures (cannot open file, out of memory, broken invariant) and are caught once at the CLI boundary. Data failures are returned as `Result<T, E>` values ([ADR-0007](adr/ADR-0007-error-handling.md)).
 
 | Condition | Behavior | Surfaced as |
 |---|---|---|
@@ -466,9 +474,9 @@ Exact versions are pinned in CI and recorded in `docs/getting-started.md`.
 | Library | Purpose | Linked by | Acquisition |
 |---|---|---|---|
 | GoogleTest | Unit / integration tests | tests only | `FetchContent`, release archive + SHA-256 (v1.18.0) |
-| nlohmann/json | Config, reports, manifests | `logguard_io`, `apps` | `FetchContent`, release archive + SHA-256 (M1) |
-| CLI11 | Command-line parsing | `apps` only | `FetchContent`, release archive + SHA-256 (M1) |
-| spdlog | Diagnostics logging | `apps` (+ io) | `FetchContent`, release archive + SHA-256 (M1) |
+| nlohmann/json | Config, reports, manifests | `logguard_io`, `apps` | `FetchContent`, release archive + SHA-256 (v3.12.0) |
+| CLI11 | Command-line parsing | `apps` only | `FetchContent`, release archive + SHA-256 (v2.7.2) |
+| spdlog | Diagnostics logging | `apps` (+ io) | `FetchContent`, release archive + SHA-256 (when needed) |
 | Google Benchmark | Micro-benchmarks | `benchmarks/` only | `FetchContent`, release archive + SHA-256 (M5) |
 | ONNX Runtime | Model inference | `logguard_onnx` only | Prebuilt release, checksum-verified (M4) |
 
