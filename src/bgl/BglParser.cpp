@@ -1,6 +1,7 @@
 #include "logguard/bgl/BglParser.hpp"
 
 #include "logguard/bgl/BglTimestamp.hpp"
+#include "logguard/bgl/LabeledBglParser.hpp"
 #include "logguard/core/Utf8.hpp"
 
 #include <array>
@@ -13,6 +14,7 @@ namespace {
 // A BGL line has 9 fixed, space-separated fields followed by free text:
 // Label Timestamp Date Node Time NodeRepeat Type Component Level Content...
 constexpr std::size_t kFixedFields = 9;
+constexpr std::size_t kLabel = 0;
 constexpr std::size_t kNode = 3;
 constexpr std::size_t kTime = 4;
 constexpr std::size_t kComponent = 7;
@@ -47,7 +49,7 @@ Result<SplitLine, ParseError> Split(std::string_view line) {
     return split;
 }
 
-// Validates the line and returns its pieces.
+// Shared by both parsers: validates the line and returns its pieces.
 Result<SplitLine, ParseError> Validate(std::string_view line) {
     if (line.empty()) {
         return Err{ParseError::kEmptyLine};
@@ -58,7 +60,7 @@ Result<SplitLine, ParseError> Validate(std::string_view line) {
     return Split(line);
 }
 
-// Builds the runtime event. The label (field 0) is never read.
+// Builds the runtime event. Note: it never reads fields[kLabel].
 Result<BglEvent, ParseError> MakeEvent(const SplitLine& split) {
     const auto timestamp = ParseBglTime(split.fields.at(kTime));
     if (!timestamp) {
@@ -81,6 +83,21 @@ Result<BglEvent, ParseError> ParseBglLine(std::string_view line) {
         return Err{split.Error()};
     }
     return MakeEvent(split.Value());
+}
+
+Result<LabeledBglEvent, ParseError> ParseLabeledBglLine(std::string_view line) {
+    const auto split = Validate(line);
+    if (!split) {
+        return Err{split.Error()};
+    }
+    auto event = MakeEvent(split.Value());
+    if (!event) {
+        return Err{event.Error()};
+    }
+    return LabeledBglEvent{
+        .event = std::move(event).Value(),
+        .label = BglLabel{.category = std::string{split.Value().fields.at(kLabel)}},
+    };
 }
 
 }  // namespace logguard::bgl

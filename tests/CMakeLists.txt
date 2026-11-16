@@ -4,6 +4,7 @@ add_executable(logguard_tests
     unit/core/Utf8Test.cpp
     unit/bgl/BglTimestampTest.cpp
     unit/bgl/BglParserTest.cpp
+    unit/bgl/LabeledBglParserTest.cpp
 )
 
 target_link_libraries(logguard_tests
